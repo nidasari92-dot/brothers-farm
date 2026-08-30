@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog CV Brothers Farm</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #f4f6f5; color: #212121; }
+    body.theme-dark { background: #0f1115; color: #e6e6e6; }
+    body.theme-dark .card { background: #181b21; }
+    body.theme-dark .header { background: linear-gradient(135deg, #14351a, #1b5e20); }
+    body.theme-dark table tr:hover td { background: #1c1f24; }
+    body.theme-dark th { color: #a0a6ad; }
+    body.theme-dark .price { color: #7ec99a; }
+    body.theme-dark .badge { background: #12231a; color: #7ec99a; }
+    body.theme-dark .empty { color: #a0a6ad; }
+    body.theme-dark .footer { color: #a0a6ad; }
+    .header { background: linear-gradient(135deg, #1b5e20, #2e7d32); color: white; padding: 30px 20px; text-align: center; }
+    .header h1 { font-size: 28px; margin-bottom: 8px; }
+    .header p { opacity: 0.9; font-size: 14px; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .card h2 { font-size: 18px; margin-bottom: 12px; color: #1b5e20; }
+    body.theme-dark .card h2 { color: #7ec99a; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e0e0e0; }
+    body.theme-dark th, body.theme-dark td { border-bottom-color: #2a2f37; }
+    th { color: #757575; font-weight: 600; font-size: 13px; }
+    tr:hover td { background: #fafafa; }
+    .price { font-weight: 700; color: #1b5e20; }
+    .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; background: #e8f5e9; color: #1b5e20; }
+    .empty { color: #757575; font-style: italic; }
+    .footer { text-align: center; padding: 20px; color: #757575; font-size: 12px; }
+    .theme-toggle { position: fixed; top: 12px; right: 12px; padding: 8px 12px; background: rgba(0,0,0,0.25); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .theme-toggle:hover { background: rgba(0,0,0,0.45); }
+    @media (max-width: 768px) {
+      .header h1 { font-size: 22px; }
+      table { font-size: 13px; }
+      th, td { padding: 8px 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌾 Katalog CV Brothers Farm</h1>
+    <p>Harga berlaku untuk hari ini. Update harga rutin setiap hari.</p>
+    <button id="theme-toggle" class="theme-toggle">🌓</button>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>📦 Daftar Produk</h2>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+        <select id="products-limit" style="padding:4px 6px;border-radius:4px;border:1px solid #e0e0e0;background:white;color:#212121;font-size:12px;height:28px;">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <button id="products-prev" style="padding:4px 10px;border-radius:4px;border:1px solid #e0e0e0;background:white;color:#212121;cursor:pointer;font-size:12px;height:28px;min-width:28px;">◀</button>
+        <span id="products-page-info" style="font-size:12px;color:#757575;min-width:20px;text-align:center;">1</span>
+        <button id="products-next" style="padding:4px 10px;border-radius:4px;border:1px solid #e0e0e0;background:white;color:#212121;cursor:pointer;font-size:12px;height:28px;min-width:28px;">▶</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Nama</th>
+            <th>Satuan</th>
+            <th class="text-right">Harga Jual</th>
+          </tr>
+        </thead>
+        <tbody id="products-table">
+          <tr><td colspan="4" class="empty">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>📋 Ringkasan Harga Hari Ini</h2>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+        <select id="prices-limit" style="padding:4px 6px;border-radius:4px;border:1px solid #e0e0e0;background:white;color:#212121;font-size:12px;height:28px;">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <button id="prices-prev" style="padding:4px 10px;border-radius:4px;border:1px solid #e0e0e0;background:white;color:#212121;cursor:pointer;font-size:12px;height:28px;min-width:28px;">◀</button>
+        <span id="prices-page-info" style="font-size:12px;color:#757575;min-width:20px;text-align:center;">1</span>
+        <button id="prices-next" style="padding:4px 10px;border-radius:4px;border:1px solid #e0e0e0;background:white;color:#212121;cursor:pointer;font-size:12px;height:28px;min-width:28px;">▶</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Nama</th>
+            <th>Kategori</th>
+            <th class="text-right">Harga</th>
+          </tr>
+        </thead>
+        <tbody id="prices-table">
+          <tr><td colspan="4" class="empty">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>📞 Kontak & Pemesanan</h2>
+      <p>Untuk pemesanan, hubungi sales kami atau datang langsung ke toko.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    CV Brothers Farm &copy; 2026 - Sistem Penjualan
+  </div>
+
+  <script>
+    let productsPage = 1, productsLimit = 20;
+    let pricesPage = 1, pricesLimit = 20;
+
+    async function loadProducts() {
+      try {
+        const res = await fetch(`/api/catalog/products?page=${productsPage}&limit=${productsLimit}`);
+        const payload = await res.json();
+        const products = payload.data || [];
+        renderProducts(products);
+        const pi = document.getElementById('products-page-info');
+        if (pi) pi.textContent = (payload.pagination && payload.pagination.page) || productsPage;
+        window.__productsHasNext = !!(payload.pagination && payload.pagination.hasNext);
+      } catch (e) {
+        document.getElementById('products-table').innerHTML = '<tr><td colspan="4" class="empty">Gagal memuat data.</td></tr>';
+      }
+    }
+
+    async function loadPrices() {
+      try {
+        const res = await fetch(`/api/catalog/prices/latest?page=${pricesPage}&limit=${pricesLimit}`);
+        const payload = await res.json();
+        const prices = payload.data || [];
+        renderPrices(prices);
+        const pi = document.getElementById('prices-page-info');
+        if (pi) pi.textContent = (payload.pagination && payload.pagination.page) || pricesPage;
+        window.__pricesHasNext = !!(payload.pagination && payload.pagination.hasNext);
+      } catch (e) {
+        document.getElementById('prices-table').innerHTML = '<tr><td colspan="4" class="empty">Gagal memuat data.</td></tr>';
+      }
+    }
+
+    function initCatalogPagination() {
+      const pLimit = document.getElementById('products-limit');
+      if (pLimit) {
+        pLimit.onchange = () => {
+          productsLimit = parseInt(pLimit.value, 10) || 20;
+          productsPage = 1;
+          loadProducts();
+        };
+      }
+      const pPrev = document.getElementById('products-prev');
+      if (pPrev) pPrev.onclick = () => { if (productsPage > 1) { productsPage--; loadProducts(); } };
+      const pNext = document.getElementById('products-next');
+      if (pNext) pNext.onclick = () => { if (window.__productsHasNext) { productsPage++; loadProducts(); } };
+
+      const prLimit = document.getElementById('prices-limit');
+      if (prLimit) {
+        prLimit.onchange = () => {
+          pricesLimit = parseInt(prLimit.value, 10) || 20;
+          pricesPage = 1;
+          loadPrices();
+        };
+      }
+      const prPrev = document.getElementById('prices-prev');
+      if (prPrev) prPrev.onclick = () => { if (pricesPage > 1) { pricesPage--; loadPrices(); } };
+      const prNext = document.getElementById('prices-next');
+      if (prNext) prNext.onclick = () => { if (window.__pricesHasNext) { pricesPage++; loadPrices(); } };
+    }
+
+    function rupiah(n) {
+      return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+    }
+
+    function renderProducts(products) {
+      const tbody = document.getElementById('products-table');
+      if (!products.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Belum ada produk.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = products.map(p => `
+        <tr>
+          <td><span class="badge">${escapeHtml(p.kode)}</span></td>
+          <td>${escapeHtml(p.nama)}</td>
+          <td>${escapeHtml(p.satuan || '-')}</td>
+          <td class="text-right price">${rupiah(p.hargaJualTerakhir)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPrices(prices) {
+      const tbody = document.getElementById('prices-table');
+      if (!prices.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Belum ada harga.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = prices.map(p => `
+        <tr>
+          <td>${escapeHtml(p.kode)}</td>
+          <td>${escapeHtml(p.nama)}</td>
+          <td>${escapeHtml(p.supplierNama || '-')}</td>
+          <td class="text-right price">${rupiah(p.hargaJualTerakhir)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    initCatalogPagination();
+    loadProducts();
+    loadPrices();
+
+    (function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      applyTheme(theme);
+      const btn = document.getElementById('theme-toggle');
+      if (btn) {
+        btn.onclick = () => {
+          const current = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+          const next = current === 'dark' ? 'light' : 'dark';
+          applyTheme(next);
+        };
+      }
+    })();
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.body.classList.add('theme-dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.body.classList.remove('theme-dark');
+        document.documentElement.removeAttribute('data-theme');
+      }
+      localStorage.setItem('theme', theme);
+    }
+  </script>
+</body>
+</html>

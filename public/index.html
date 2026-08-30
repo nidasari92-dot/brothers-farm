@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Brothers Farm - Sistem Penjualan</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-box">
+    <div style="text-align:center;margin-bottom:12px;">
+      <img class="login-logo light-logo" src="/images/logo.png" style="height:60px;vertical-align:middle;" onerror="this.style.display='none'">
+      <img class="login-logo dark-logo" src="/images/logo-sidebar.png" style="height:48px;vertical-align:middle;" onerror="this.style.display='none'">
+    </div>
+    <h1>CV Brothers Farm</h1>
+    <p class="subtitle">Sistem Penjualan & Manajemen</p>
+    <button id="login-theme-toggle" class="theme-toggle" title="Ganti tema" style="position:static;margin:0 auto 12px;display:block;">🌓</button>
+    <form id="login-form">
+      <label>Username</label>
+      <input type="text" id="login-username" required autocomplete="username">
+      <label>Password</label>
+      <input type="password" id="login-password" required autocomplete="current-password">
+      <button type="submit">Masuk</button>
+      <p id="login-error" class="error-text"></p>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand">
+      <img id="brand-logo" src="/images/logo-sidebar.png" style="height:32px;vertical-align:middle;margin-right:6px;" onerror="this.style.display='none'">
+      <span>Brothers Farm</span>
+    </div>
+    <nav id="nav-menu"></nav>
+    <div class="sidebar-footer">
+      <div id="user-info"></div>
+      <button id="logout-btn">Keluar</button>
+    </div>
+  </aside>
+  <main class="content">
+    <header class="topbar">
+      <h2 id="page-title">Dashboard</h2>
+      <button id="theme-toggle" class="btn secondary small" title="Ganti tema">🌓</button>
+    </header>
+    <div id="page-content" class="page-content"></div>
+  </main>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  if (typeof initTheme === 'function') initTheme();
+</script>
+</body>
+</html>

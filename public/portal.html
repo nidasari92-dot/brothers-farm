@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Brothers Farm - Portal Customer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #f4f6f5; color: #212121; }
+    body.theme-dark { background: #0f1115; color: #e6e6e6; }
+    body.theme-dark .card { background: #181b21; }
+    body.theme-dark .header { background: #0b0e11; }
+    body.theme-dark table tr:hover td { background: #1c1f24; }
+    body.theme-dark th { color: #a0a6ad; }
+    body.theme-dark td { border-bottom-color: #2a2f37; }
+    body.theme-dark .price { color: #7ec99a; }
+    body.theme-dark .badge { background: #12231a; color: #7ec99a; }
+    body.theme-dark .empty { color: #a0a6ad; }
+    body.theme-dark .btn.secondary { background: #14171c; color: #7ec99a; border-color: #2a2f37; }
+    body.theme-dark .form-group input { background: #14171c; border-color: #2a2f37; color: var(--text); }
+    body.theme-dark .form-group label { color: #a0a6ad; }
+    .header { background: #1b5e20; color: white; padding: 20px; }
+    .header h1 { font-size: 22px; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .card h2 { font-size: 18px; margin-bottom: 12px; color: #1b5e20; }
+    body.theme-dark .card h2 { color: #7ec99a; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e0e0e0; }
+    th { color: #757575; font-weight: 600; font-size: 13px; }
+    tr:hover td { background: #fafafa; }
+    .price { font-weight: 700; color: #1b5e20; }
+    .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; background: #e8f5e9; color: #1b5e20; }
+    .empty { color: #757575; font-style: italic; }
+    .btn { padding: 10px 20px; background: #2e7d32; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .btn:hover { background: #1b5e20; }
+    .btn.secondary { background: white; color: #1b5e20; border: 1px solid #2e7d32; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 13px; margin-bottom: 4px; color: #757575; }
+    .form-group input { width: 100%; padding: 8px 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; }
+    .nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .nav button { flex: 1; min-width: 120px; }
+    .hidden { display: none !important; }
+    .theme-toggle { position: fixed; top: 12px; right: 12px; padding: 8px 12px; background: rgba(0,0,0,0.25); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .theme-toggle:hover { background: rgba(0,0,0,0.45); }
+    .chatbox { border-color: #e0e0e0; background: #fafafa; }
+    body.theme-dark .chatbox { background: #14171c; border-color: #2a2f37; color: #e6e6e6; }
+    .chat-bubble { padding: 10px; border-radius: 8px; margin-bottom: 10px; max-width: 80%; }
+    .chat-bubble.bot { background: #e8f5e9; }
+    .chat-bubble.user { background: #e3f2fd; text-align: right; margin-left: auto; }
+    body.theme-dark .chat-bubble.bot { background: #12231a; color: #e6e6e6; }
+    body.theme-dark .chat-bubble.user { background: #11202e; color: #e6e6e6; }
+    .chat-input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    body.theme-dark .chat-input { background: #14171c; border-color: #2a2f37; color: #e6e6e6; }
+    #user-info { position: fixed; top: 12px; right: 110px; color: white; font-size: 13px; background: rgba(0,0,0,0.35); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.25); z-index: 50; max-width: 50vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    body.theme-dark #user-info { background: rgba(0,0,0,0.55); border-color: rgba(255,255,255,0.35); }
+    @media (max-width: 768px) {
+      #user-info { right: 68px; font-size: 11px; padding: 5px 8px; max-width: 45vw; }
+      .header h1 { font-size: 18px; }
+      table { font-size: 13px; }
+      th, td { padding: 8px 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><img src="/images/logo-sidebar.png" style="height:32px;vertical-align:middle;margin-right:6px;" onerror="this.style.display='none'"> CV Brothers Farm - Portal Customer</h1>
+    <p id="user-info"></p>
+    <button id="theme-toggle" class="theme-toggle">🌓</button>
+  </div>
+
+  <div class="container">
+    <!-- Login/Register -->
+    <div id="auth-section" class="card">
+      <h2>Masuk ke Portal</h2>
+
+      <!-- Login Form -->
+      <div id="login-form">
+        <div class="form-group">
+          <label>Email / HP</label>
+          <input type="text" id="username" placeholder="Email atau nomor HP">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Password">
+        </div>
+        <button class="btn" onclick="login()">Login</button>
+        <button class="btn secondary" onclick="showRegister()">Daftar</button>
+        <p id="auth-msg" style="margin-top:10px;color:#c62828;"></p>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form" class="hidden">
+        <div class="form-group">
+          <label>Nama Lengkap</label>
+          <input type="text" id="nama" placeholder="Nama lengkap">
+        </div>
+        <div class="form-group">
+          <label>Email / HP</label>
+          <input type="text" id="reg-username" placeholder="Email atau nomor HP">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Password">
+        </div>
+        <div class="form-group">
+          <label>Alamat (opsional)</label>
+          <input type="text" id="alamat" placeholder="Alamat">
+        </div>
+        <button class="btn" onclick="register()">Daftar</button>
+        <button class="btn secondary" onclick="showLogin()">Kembali ke Login</button>
+        <p id="auth-msg" style="margin-top:10px;color:#c62828;"></p>
+      </div>
+    </div>
+
+    <!-- Customer Portal -->
+    <div id="portal-section" class="hidden">
+      <div class="nav">
+        <button class="btn secondary" onclick="showSection('catalog')">📦 Katalog</button>
+        <button class="btn secondary" onclick="showSection('new-order')">🛒 Buat Order</button>
+        <button class="btn secondary" onclick="showSection('orders')">📋 Order Saya</button>
+        <button class="btn secondary" onclick="showSection('payments')">💳 Pembayaran</button>
+        <button class="btn secondary" onclick="showSection('invoices')">🧾 Invoice</button>
+        <button class="btn secondary" onclick="showSection('chatbot')">💬 Chatbot</button>
+        <button class="btn secondary" onclick="logout()">Keluar</button>
+      </div>
+
+      <div id="section-catalog" class="card">
+        <h2>📦 Katalog Produk & Harga Hari Ini</h2>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+          <select id="catalog-limit" style="padding:4px 6px;border-radius:4px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:12px;height:28px;">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button id="catalog-prev" style="padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);cursor:pointer;font-size:12px;height:28px;min-width:28px;">◀</button>
+          <span id="catalog-page-info" style="font-size:12px;color:var(--text-muted);min-width:20px;text-align:center;">1</span>
+          <button id="catalog-next" style="padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);cursor:pointer;font-size:12px;height:28px;min-width:28px;">▶</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Kode</th><th>Nama</th><th>Satuan</th><th class="text-right">Harga</th></tr></thead>
+            <tbody id="catalog-table"><tr><td colspan="4" class="empty">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="section-new-order" class="card hidden">
+        <h2>🛒 Buat Order Baru</h2>
+        <div class="form-group">
+          <label>Tanggal Order</label>
+          <input type="date" id="order-tanggal">
+        </div>
+        <div class="form-group">
+          <label>Metode Bayar</label>
+          <select id="order-metode">
+            <option value="Tempo">Tempo</option>
+            <option value="Cash">Cash</option>
+            <option value="Transfer">Transfer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Pilih Produk</label>
+          <select id="order-produk" onchange="addToCart()">
+            <option value="">-- Pilih produk --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Qty</label>
+          <input type="number" id="order-qty" value="1" min="1">
+          <button class="btn secondary" onclick="addToCart()">Tambah</button>
+        </div>
+        <table>
+          <thead><tr><th>Produk</th><th>Qty</th><th>Harga</th><th>Subtotal</th><th></th></tr></thead>
+          <tbody id="cart-table"><tr><td colspan="5" class="empty">Keranjang kosong</td></tr></tbody>
+        </table>
+        <p style="margin-top:10px;font-weight:700;">Total: <span id="cart-total">Rp 0</span></p>
+        <button class="btn" onclick="submitOrder()">Kirim Order</button>
+        <p id="order-msg" style="margin-top:10px;color:#c62828;"></p>
+      </div>
+
+      <div id="section-orders" class="card hidden">
+        <h2>📋 Order Saya</h2>
+        <table>
+          <thead><tr><th>No Order</th><th>Tanggal</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="orders-table"><tr><td colspan="5" class="empty">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div id="section-payment-detail" class="card hidden">
+        <h2>💳 Detail Pembayaran</h2>
+        <div id="payment-content"></div>
+        <button class="btn secondary" onclick="showSection('orders')">Kembali ke Order</button>
+      </div>
+
+      <div id="section-payments" class="card hidden">
+        <h2>💳 Pembayaran Saya</h2>
+        <table>
+          <thead><tr><th>No</th><th>Tanggal</th><th>Jumlah</th><th>Keterangan</th></tr></thead>
+          <tbody id="payments-table"><tr><td colspan="4" class="empty">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div id="section-invoices" class="card hidden">
+        <h2>🧾 Invoice Saya</h2>
+        <table>
+          <thead><tr><th>No Invoice</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody id="invoices-table"><tr><td colspan="4" class="empty">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div id="section-chatbot" class="card">
+        <h2>💬 Chatbot - CV Brothers Farm</h2>
+        <div id="chatbot-messages" class="chatbox" style="height:300px;overflow-y:auto;border:1px solid #e0e0e0;padding:10px;border-radius:8px;background:#fafafa;">
+          <div class="chat-bubble bot" style="background:#e8f5e9;padding:10px;border-radius:8px;margin-bottom:10px;max-width:80%;">
+            <strong>Bot:</strong><br>
+            Halo! Saya asisten CV Brothers Farm. Saya bisa bantu:<br>
+            • Harga produk<br>
+            • Cara order<br>
+            • Metode pembayaran<br>
+            • Status order<br>
+            • Kontak admin<br><br>
+            Apa yang bisa saya bantu?
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <input type="text" id="chatbot-input" placeholder="Tulis pertanyaan..." class="chat-input" onkeypress="if(event.key==='Enter')sendChatbotMessage()">
+          <button class="btn" onclick="sendChatbotMessage()">Kirim</button>
+        </div>
+        <p id="chatbot-msg" style="margin-top:8px;color:#c62828;"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('customer_token');
+    let user = JSON.parse(localStorage.getItem('customer_user') || 'null');
+    let catalogPage = 1;
+    let catalogLimit = 20;
+
+    function updateUI() {
+      if (token && user) {
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('portal-section').classList.remove('hidden');
+        document.getElementById('user-info').textContent = 'Login sebagai: ' + user.nama + ' (' + user.role + ')';
+        initCatalogPagination();
+        loadCatalog();
+      } else {
+        document.getElementById('auth-section').classList.remove('hidden');
+        document.getElementById('portal-section').classList.add('hidden');
+        document.getElementById('user-info').textContent = '';
+      }
+    }
+
+    function showSection(name) {
+      ['catalog', 'new-order', 'orders', 'payment-detail', 'payments', 'invoices', 'chatbot'].forEach(s => {
+        const el = document.getElementById('section-' + s);
+        if (el) el.classList.toggle('hidden', s !== name);
+      });
+      if (name === 'catalog') loadCatalog();
+      if (name === 'new-order') loadNewOrder();
+      if (name === 'orders') loadOrders();
+      if (name === 'payments') loadPayments();
+      if (name === 'invoices') loadInvoices();
+    }
+
+    async function register() {
+      const nama = document.getElementById('nama').value.trim();
+      const username = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const alamat = document.getElementById('alamat').value.trim();
+      if (!nama || !username || !password) {
+        return showAuthMsg('Nama, username/email, dan password wajib diisi.');
+      }
+      const res = await fetch('/api/customer/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama, username, password, alamat, hp: username })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showAuthMsg('Registrasi berhasil! Silakan login.');
+        setTimeout(showLogin, 1200);
+      } else {
+        showAuthMsg(data.error || 'Gagal daftar.');
+      }
+    }
+
+    async function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const res = await fetch('/api/customer/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        token = data.token;
+        user = data.user;
+        localStorage.setItem('customer_token', token);
+        localStorage.setItem('customer_user', JSON.stringify(user));
+        updateUI();
+      } else {
+        showAuthMsg(data.error || 'Login gagal.');
+      }
+    }
+
+    function showRegister() {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+      const msg = document.getElementById('auth-msg');
+      if (msg) msg.textContent = '';
+    }
+
+    function showLogin() {
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+      const msg = document.getElementById('auth-msg');
+      if (msg) msg.textContent = '';
+    }
+
+    function logout() {
+      token = null;
+      user = null;
+      localStorage.removeItem('customer_token');
+      localStorage.removeItem('customer_user');
+      showLogin();
+      updateUI();
+    }
+
+    function showAuthMsg(msg) {
+      document.getElementById('auth-msg').textContent = msg;
+    }
+
+    async function loadCatalog() {
+      const page = catalogPage || 1;
+      const limit = catalogLimit || 20;
+      const res = await fetch(`/api/portal/prices?page=${page}&limit=${limit}`, { headers: { 'Authorization': 'Bearer ' + token } });
+      const payload = await res.json();
+      const data = payload.data || [];
+      const pagination = payload.pagination || {};
+      const tbody = document.getElementById('catalog-table');
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Belum ada produk.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td><span class="badge">${escapeHtml(p.kode)}</span></td>
+          <td>${escapeHtml(p.nama)}</td>
+          <td>${escapeHtml(p.satuan || '-')}</td>
+          <td class="text-right price">${rupiah(p.hargaJualTerakhir)}</td>
+        </tr>
+      `).join('');
+      const pageInfo = document.getElementById('catalog-page-info');
+      if (pageInfo) pageInfo.textContent = pagination.page || page;
+      window.__catalogHasNext = !!(pagination && pagination.hasNext);
+    }
+
+    function initCatalogPagination() {
+      const limitEl = document.getElementById('catalog-limit');
+      if (limitEl) {
+        limitEl.onchange = () => {
+          catalogLimit = parseInt(limitEl.value, 10) || 20;
+          catalogPage = 1;
+          loadCatalog();
+        };
+      }
+      const prevBtn = document.getElementById('catalog-prev');
+      if (prevBtn) prevBtn.onclick = () => { if (catalogPage > 1) { catalogPage--; loadCatalog(); } };
+      const nextBtn = document.getElementById('catalog-next');
+      if (nextBtn) nextBtn.onclick = () => { if (window.__catalogHasNext) { catalogPage++; loadCatalog(); } };
+    }
+
+    async function loadOrders() {
+      const res = await fetch('/api/portal/orders', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tbody = document.getElementById('orders-table');
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">Belum ada order.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(o => `
+        <tr>
+          <td>${escapeHtml(o.noOrder)}</td>
+          <td>${o.tanggal}</td>
+          <td class="text-right price">${rupiah(o.total)}</td>
+          <td><span class="badge ${o.status === 'Lunas' ? 'green' : 'orange'}">${escapeHtml(o.status)}</span></td>
+          <td>
+            ${o.status !== 'Lunas' ? `<button class="btn secondary" onclick="showPaymentForm(${o.id}, ${o.total})">Bayar</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadPayments() {
+      const res = await fetch('/api/portal/payments', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tbody = document.getElementById('payments-table');
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Belum ada pembayaran.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(p => {
+        let ket = p.keterangan || '-';
+        try {
+          const obj = JSON.parse(ket);
+          if (obj.orderNo || obj.customerName) {
+            ket = [obj.orderNo, obj.customerName].filter(Boolean).join(' - ');
+          }
+        } catch {}
+        return `
+        <tr>
+          <td>${escapeHtml(p.noPembayaran)}</td>
+          <td>${p.tanggal}</td>
+          <td class="text-right price">${rupiah(p.jumlahBayar)}</td>
+          <td>${escapeHtml(ket)}</td>
+        </tr>
+      `}).join('');
+    }
+
+    async function loadInvoices() {
+      const res = await fetch('/api/portal/invoices', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tbody = document.getElementById('invoices-table');
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty">Belum ada invoice.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(i => `
+        <tr>
+          <td>${escapeHtml(i.noInvoice)}</td>
+          <td>${i.tanggal}</td>
+          <td class="text-right price">${rupiah(i.total)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function rupiah(n) {
+      return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Cart state
+    let cart = [];
+    let currentPaymentOrderId = null;
+
+    async function loadNewOrder() {
+      const res = await fetch('/api/portal/prices', { headers: { 'Authorization': 'Bearer ' + token } });
+      const products = await res.json();
+      const select = document.getElementById('order-produk');
+      select.innerHTML = '<option value="">-- Pilih produk --</option>' +
+        products.map(p => `<option value="${p.id}" data-harga="${p.hargaJualTerakhir}" data-satuan="${escapeHtml(p.satuan || '')}">${escapeHtml(p.kode)} - ${escapeHtml(p.nama)} (${rupiah(p.hargaJualTerakhir)})</option>`).join('');
+      cart = [];
+      renderCart();
+      document.getElementById('order-tanggal').value = new Date().toISOString().slice(0, 10);
+    }
+
+    function addToCart() {
+      const select = document.getElementById('order-produk');
+      const qtyInput = document.getElementById('order-qty');
+      const produkId = Number(select.value);
+      const qty = Number(qtyInput.value);
+      if (!produkId) return showOrderMsg('Pilih produk terlebih dahulu.');
+      if (!qty || qty <= 0) return showOrderMsg('Qty harus lebih besar dari 0.');
+      const option = select.selectedOptions[0];
+      const harga = Number(option.dataset.harga);
+      const nama = option.text.split(' (')[0];
+      const existing = cart.find(c => c.produkId === produkId);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cart.push({ produkId, nama, qty, hargaJual: harga, satuan: option.dataset.satuan });
+      }
+      qtyInput.value = 1;
+      select.value = '';
+      renderCart();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
+
+    function renderCart() {
+      const tbody = document.getElementById('cart-table');
+      if (!cart.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">Keranjang kosong</td></tr>';
+        document.getElementById('cart-total').textContent = 'Rp 0';
+        return;
+      }
+      tbody.innerHTML = cart.map((c, i) => `
+        <tr>
+          <td>${escapeHtml(c.nama)}</td>
+          <td>${c.qty}</td>
+          <td class="text-right">${rupiah(c.hargaJual)}</td>
+          <td class="text-right">${rupiah(c.qty * c.hargaJual)}</td>
+          <td><button class="btn secondary" onclick="removeFromCart(${i})">Hapus</button></td>
+        </tr>
+      `).join('');
+      const total = cart.reduce((sum, c) => sum + c.qty * c.hargaJual, 0);
+      document.getElementById('cart-total').textContent = rupiah(total);
+    }
+
+    async function submitOrder() {
+      if (!cart.length) return showOrderMsg('Keranjang masih kosong.');
+      const tanggal = document.getElementById('order-tanggal').value;
+      const metodeBayar = document.getElementById('order-metode').value;
+      const items = cart.map(c => ({
+        produkId: c.produkId,
+        qty: c.qty,
+        hargaJual: c.hargaJual,
+        satuan: c.satuan
+      }));
+      showOrderMsg('Mengirim order...');
+      const res = await fetch('/api/portal/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ tanggal, metodeBayar, items })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showOrderMsg('Order berhasil! No: ' + data.noOrder);
+        cart = [];
+        renderCart();
+        setTimeout(() => showSection('orders'), 800);
+      } else {
+        showOrderMsg(data.error || 'Gagal membuat order.');
+      }
+    }
+
+    function showOrderMsg(msg) {
+      document.getElementById('order-msg').textContent = msg;
+    }
+
+    async function showPaymentForm(orderId, amount) {
+      currentPaymentOrderId = orderId;
+      const content = document.getElementById('payment-content');
+      content.innerHTML = `
+        <p>Order #${orderId} - Total: <strong>${rupiah(amount)}</strong></p>
+        <div class="form-group">
+          <label>Metode Pembayaran</label>
+          <select id="pay-method">
+            <option value="transfer">Transfer Bank</option>
+            <option value="qris">QRIS</option>
+            <option value="va">Virtual Account</option>
+            <option value="midtrans">Midtrans (Kartu/VA/QRIS/E-Wallet)</option>
+          </select>
+        </div>
+        <button class="btn" onclick="submitPayment()">Buat Pembayaran</button>
+        <p id="pay-msg" style="margin-top:10px;color:#c62828;"></p>
+        <div id="pay-result"></div>
+      `;
+      showSection('payment-detail');
+    }
+
+    async function submitPayment() {
+      if (!currentPaymentOrderId) return;
+      const method = document.getElementById('pay-method').value;
+      const amountInput = document.querySelector('#payment-content p strong');
+      const amountText = amountInput ? amountInput.textContent.replace(/[^0-9]/g, '') : '0';
+      const amount = Number(amountText);
+      
+      showPayMsg('Membuat pembayaran...');
+      
+      if (method === 'midtrans') {
+        const res = await fetch('/api/payment-gateway/midtrans/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ orderId: currentPaymentOrderId, amount })
+        });
+        const data = await res.json();
+        if (res.ok && data.redirect_url) {
+          showPayMsg('');
+          window.location.href = data.redirect_url;
+          return;
+        } else {
+          showPayMsg(data.error || 'Gagal membuat pembayaran Midtrans.');
+          return;
+        }
+      }
+
+      const res = await fetch('/api/portal/pay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ orderId: currentPaymentOrderId, amount, method })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const resultDiv = document.getElementById('pay-result');
+        resultDiv.innerHTML = `
+          <div style="background:#e8f5e9;padding:15px;border-radius:8px;margin-top:15px;">
+            <h3 style="color:#1b5e20;">✅ Pembayaran Dibuat</h3>
+            <p><strong>ID:</strong> ${data.paymentId}</p>
+            <p><strong>Metode:</strong> ${data.method.toUpperCase()}</p>
+            <p><strong>Status:</strong> ${data.status}</p>
+            <p><strong>Instruksi:</strong> ${data.instructions}</p>
+            ${data.details.bank ? `<p><strong>Bank:</strong> ${data.details.bank} - ${data.details.accountNumber} a.n. ${data.details.accountName}</p>` : ''}
+            ${data.details.qrString ? `<p><strong>QRIS:</strong> Scan QR code di bawah</p><div style="background:#000;width:150px;height:150px;margin:10px 0;"></div>` : ''}
+            ${data.details.vaNumber ? `<p><strong>Virtual Account:</strong> ${data.details.vaNumber}</p>` : ''}
+            <hr style="margin:15px 0;border-color:#c8e6c9;">
+            <p style="font-size:12px;color:#757575;">🔧 Demo: Simulate pembayaran berhasil untuk testing</p>
+            <button class="btn secondary" onclick="simulatePayment('${data.paymentId}')">✅ Simulate Pembayaran Berhasil</button>
+          </div>
+        `;
+        showPayMsg('');
+      } else {
+        showPayMsg(data.error || 'Gagal membuat pembayaran.');
+      }
+    }
+
+    async function simulatePayment(paymentId) {
+      const res = await fetch('/api/portal/pay/simulate/' + paymentId, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('✅ Pembayaran Berhasil!\n\n' + data.message);
+        showSection('orders');
+        loadOrders();
+      } else {
+        showPayMsg(data.error || 'Gagal mensimulasikan pembayaran.');
+      }
+    }
+
+    function showPayMsg(msg) {
+      const el = document.getElementById('pay-msg');
+      if (el) el.textContent = msg;
+    }
+
+    async function sendChatbotMessage() {
+      const input = document.getElementById('chatbot-input');
+      const msgEl = document.getElementById('chatbot-msg');
+      const container = document.getElementById('chatbot-messages');
+      const text = input.value.trim();
+      
+      if (!text) return;
+      
+      // Add user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-bubble user';
+      userMsg.innerHTML = `<strong>Anda:</strong><br>${escapeHtml(text)}`;
+      container.appendChild(userMsg);
+      
+      input.value = '';
+      msgEl.textContent = 'Sedang menjawab...';
+      
+      try {
+        const res = await fetch('/api/chatbot/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        
+        const data = await res.json();
+        
+        // Add bot response
+        const botMsg = document.createElement('div');
+        botMsg.className = 'chat-bubble bot';
+        botMsg.innerHTML = `<strong>Bot:</strong><br>${data.reply.replace(/\n/g, '<br>')}`;
+        container.appendChild(botMsg);
+        
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+        msgEl.textContent = '';
+      } catch (err) {
+        msgEl.textContent = 'Gagal mengirim pesan. Coba lagi.';
+      }
+    }
+
+    updateUI();
+
+    (function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      applyTheme(theme);
+      const btn = document.getElementById('theme-toggle');
+      if (btn) {
+        btn.onclick = () => {
+          const current = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+          const next = current === 'dark' ? 'light' : 'dark';
+          applyTheme(next);
+        };
+      }
+    })();
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.body.classList.add('theme-dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.body.classList.remove('theme-dark');
+        document.documentElement.removeAttribute('data-theme');
+      }
+      localStorage.setItem('theme', theme);
+    }
+  </script>
+</body>
+</html>
