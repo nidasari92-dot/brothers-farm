@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT:-3232}:3232"
+    volumes:
+      - ./data:/app/data
+      - ./public/images:/app/public/images
+    environment:
+      - NODE_ENV=production
+      - PORT=3232
+      - DB_PATH=/app/data/brothersfarm.db
+      - JWT_SECRET=${JWT_SECRET:-ganti_dengan_secret_yang_sangat_rahasia}
+    restart: unless-stopped
