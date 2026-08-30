@@ -34,10 +34,6 @@ function request(method, path, body, token) {
   });
 }
 
-function assert(condition, message) {
-  if (!condition) throw new Error(message || 'Assertion failed');
-}
-
 let serverProcess;
 
 function startServer() {
@@ -84,7 +80,6 @@ async function runTests() {
     // ==========================
     let customerToken = null;
 
-    // Login with invalid credentials should fail
     {
       const res = await request('POST', '/api/customer/login', {
         username: 'nonexistent',
@@ -94,7 +89,6 @@ async function runTests() {
       console.log('✅ Customer invalid login rejected');
     }
 
-    // Register new customer
     {
       const res = await request('POST', '/api/customer/register', {
         nama: 'Test Customer',
@@ -111,27 +105,25 @@ async function runTests() {
     // 2. Dashboard API
     // ==========================
     {
-      // Need to login first to get token
-      const loginRes = await request('POST', '/api/customer/login', {
-        username: 'testcustomer',
-        password: 'testpass123'
+      // Dashboard summary requires admin
+      const adminLoginRes = await request('POST', '/api/auth/login', {
+        username: 'admin',
+        password: 'admin123'
       });
-      if (loginRes.status === 200) {
-        const token = loginRes.data.token;
-        const res = await request('GET', '/api/dashboard/summary', null, token);
+      if (adminLoginRes.status === 200) {
+        const adminToken = adminLoginRes.data.token;
+        const res = await request('GET', '/api/dashboard/summary', null, adminToken);
         if (res.status !== 200) throw new Error('Dashboard summary should return 200');
         if (typeof res.data !== 'object') throw new Error('Dashboard summary should return object');
         console.log('✅ Dashboard summary OK');
       } else {
-        console.log('⚠️  Dashboard test skipped: customer login failed');
+        console.log('⚠️  Dashboard test skipped: admin login failed');
       }
     }
-
     // ==========================
     // 3. Catalog Pagination
     // ==========================
     {
-      // Products pagination
       const res1 = await request('GET', '/api/catalog/products?page=1&limit=20');
       if (res1.status !== 200) throw new Error('Products page 1 should return 200');
       const items1 = Array.isArray(res1.data) ? res1.data : res1.data?.data;
@@ -139,7 +131,6 @@ async function runTests() {
       if (items1.length > 20) throw new Error('Products limit 20 should not exceed 20');
       console.log(`✅ Products pagination OK: ${items1.length} items`);
 
-      // Prices pagination
       const res2 = await request('GET', '/api/catalog/prices/latest?page=1&limit=20');
       if (res2.status !== 200) throw new Error('Prices page 1 should return 200');
       const items2 = Array.isArray(res2.data) ? res2.data : res2.data?.data;
@@ -147,7 +138,6 @@ async function runTests() {
       if (items2.length > 20) throw new Error('Prices limit 20 should not exceed 20');
       console.log(`✅ Prices pagination OK: ${items2.length} items`);
 
-      // Portal prices pagination (requires auth)
       const portalLoginRes = await request('POST', '/api/customer/login', {
         username: 'testcustomer',
         password: 'testpass123'
@@ -168,12 +158,10 @@ async function runTests() {
     // 4. Invoice Generation
     // ==========================
     {
-      // Unauthenticated invoice requests should return 401
       const listRes = await request('GET', '/api/invoices');
       if (listRes.status !== 401) throw new Error('Unauthenticated invoice list should return 401');
       console.log('✅ Invoice unauthenticated rejected');
 
-      // Try to login as admin to test invoice generation
       const adminLoginRes = await request('POST', '/api/auth/login', {
         username: 'admin',
         password: 'admin123'
@@ -181,7 +169,6 @@ async function runTests() {
       if (adminLoginRes.status === 200) {
         const adminToken = adminLoginRes.data.token;
         
-        // Get invoice list
         const listRes2 = await request('GET', '/api/invoices', null, adminToken);
         if (listRes2.status !== 200) throw new Error('Invoice list should return 200');
         const invoices = Array.isArray(listRes2.data) ? listRes2.data : listRes2.data?.data || [];
@@ -190,15 +177,12 @@ async function runTests() {
         if (invoices.length > 0) {
           const invoiceId = invoices[0].id;
           
-          // Get invoice detail
           const detailRes = await request('GET', `/api/invoices/${invoiceId}`, null, adminToken);
           if (detailRes.status !== 200) throw new Error('Invoice detail should return 200');
           if (!detailRes.data.id) throw new Error('Invoice detail should have invoice data');
           console.log('✅ Invoice detail OK');
 
-          // Generate PDF
           const pdfRes = await request('GET', `/api/invoices/${invoiceId}/pdf`, null, adminToken);
-          // PDF endpoint might redirect or return file
           if (![200, 302].includes(pdfRes.status)) throw new Error('PDF generation should return 200 or 302');
           console.log('✅ Invoice PDF generation OK');
         } else {
