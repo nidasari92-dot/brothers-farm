@@ -453,7 +453,7 @@
     let currentPaymentOrderId = null;
 
     async function loadNewOrder() {
-      const res = await fetch('/api/portal/prices', { headers: { 'Authorization': 'Bearer ' + token } });
+      const res = await fetch('/api/portal/products', { headers: { 'Authorization': 'Bearer ' + token } });
       const products = await res.json();
       const select = document.getElementById('order-produk');
       select.innerHTML = '<option value="">-- Pilih produk --</option>' +

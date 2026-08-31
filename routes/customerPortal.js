@@ -12,6 +12,7 @@ router.post('/orders', ctrl.createOrder);
 router.get('/payments', ctrl.myPayments);
 router.get('/invoices', ctrl.myInvoices);
 router.get('/prices', ctrl.latestPrices);
+router.get('/products', ctrl.productsForOrder);
 
 // Payment gateway endpoints
 router.post('/pay', ctrl.createPayment);

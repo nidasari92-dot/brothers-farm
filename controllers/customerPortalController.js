@@ -111,6 +111,18 @@ function latestPrices(req, res) {
   });
 }
 
+// Get all active products for order form dropdown
+function productsForOrder(req, res) {
+  const rows = db.prepare(`
+    SELECT p.id, p.kode, p.nama, p.kategori, p.satuan, p.hargaJualTerakhir
+    FROM produk p
+    WHERE p.status = 'Aktif' AND p.hargaJualTerakhir IS NOT NULL
+    ORDER BY p.kategori, p.nama
+  `).all();
+
+  res.json(rows);
+}
+
 // Customer creates their own order
 function createOrder(req, res) {
   const customerId = req.user.customerId;
@@ -309,6 +321,7 @@ module.exports = {
   myPayments,
   myInvoices,
   latestPrices,
+  productsForOrder,
   createOrder,
   createPayment,
   getPaymentStatus,
