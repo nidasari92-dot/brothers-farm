@@ -32,7 +32,7 @@ function list(req, res) {
 // Jika jenis pembayaran_bonus -> mengurangi sisa bonus (dicek agar tidak melebihi sisa bonus)
 // dan otomatis membuat Invoice Bonus ke Sales.
 const createPayment = db.transaction((payload, userId) => {
-  const { tanggal, customerId, supplierId, salesId, jumlahBayar, jenis, keterangan } = payload;
+  const { tanggal, customerId, supplierId, salesId, jumlahBayar, jenis, keterangan, orderId, metodeBayar, status } = payload;
   const noPembayaran = generateNoPembayaran(jenis);
   const jumlah = Number(jumlahBayar);
 
@@ -56,14 +56,18 @@ const createPayment = db.transaction((payload, userId) => {
   }
 
   const info = db.prepare(`
-    INSERT INTO pembayaran (noPembayaran, tanggal, customerId, supplierId, salesId, jumlahBayar, jenis, keterangan, createdBy)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(noPembayaran, tanggal, customerId || null, supplierId || null, salesId || null, jumlah, jenis, keterangan || null, userId);
+    INSERT INTO pembayaran (noPembayaran, tanggal, customerId, supplierId, salesId, jumlahBayar, jenis, keterangan, createdBy, orderId, metodeBayar, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(noPembayaran, tanggal, customerId || null, supplierId || null, salesId || null, jumlah, jenis, keterangan || null, userId, orderId ? Number(orderId) : null, metodeBayar || 'transfer', status || 'Menunggu Pembayaran');
 
   const pembayaranId = info.lastInsertRowid;
 
   if (jenis === 'pengeluaran_supplier' && supplierId) {
     db.prepare('UPDATE supplier SET totalBayar = totalBayar + ? WHERE id = ?').run(jumlah, supplierId);
+  }
+
+  if (orderId && status === 'Lunas') {
+    db.prepare("UPDATE orders SET status = 'Lunas' WHERE id = ?").run(Number(orderId));
   }
 
   let invoiceId = null;
@@ -83,6 +87,15 @@ const createPayment = db.transaction((payload, userId) => {
     const invInfo = db.prepare(`      INSERT INTO invoice (noInvoice, tanggal, jenis, refId, total, logo, caption, createdBy)
       VALUES (?, ?, 'supplier', ?, ?, ?, ?, ?)
     `).run(noInvoice, tanggal, pembayaranId, jumlah, map.logo || null, `Pembayaran supplier - ${supplier ? supplier.nama : ''} - ${keterangan || ''}`, userId);
+    invoiceId = invInfo.lastInsertRowid;
+  } else if (jenis === 'penerimaan_customer' && orderId) {
+    const noInvoice = generateNoInvoice('customer');
+    const settings = db.prepare('SELECT key, value FROM settings').all();
+    const map = Object.fromEntries(settings.map(s => [s.key, s.value]));
+    const order = db.prepare('SELECT noOrder FROM orders WHERE id = ?').get(Number(orderId));
+    const invInfo = db.prepare(`      INSERT INTO invoice (noInvoice, tanggal, jenis, refId, total, logo, caption, createdBy)
+      VALUES (?, ?, 'customer', ?, ?, ?, ?, ?)
+    `).run(noInvoice, tanggal, pembayaranId, jumlah, map.logo || null, `Pembayaran customer - ${order ? order.noOrder : ''} - ${keterangan || ''}`, userId);
     invoiceId = invInfo.lastInsertRowid;
   }
 

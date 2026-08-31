@@ -822,7 +822,8 @@ async function renderPayments() {
 }
 
 async function openPaymentForm() {
-  const [customers, suppliers, sales] = await Promise.all([Api.get('/customers'), Api.get('/suppliers'), Api.get('/sales')]);
+  const [customers, suppliers, sales, orders] = await Promise.all([Api.get('/customers'), Api.get('/suppliers'), Api.get('/sales'), Api.get('/orders')]);
+  const unpaidOrders = orders.filter(o => o.status !== 'Lunas');
   openModal(`
     <h3>Catat Pembayaran</h3>
     <form id="payment-form">
@@ -838,6 +839,25 @@ async function openPaymentForm() {
         <label>Customer</label>
         <select name="customerId"><option value="">- Pilih -</option>${customers.map(c => `<option value="${c.id}">${escapeHtml(c.nama)}</option>`).join('')}</select>
       </div>
+      <div class="form-group" id="order-container" style="display:none">
+        <label>Order</label>
+        <select name="orderId"><option value="">- Pilih -</option>${unpaidOrders.map(o => `<option value="${o.id}">${o.noOrder} - ${escapeHtml(o.customerNama || '-')} (${rupiah(o.total)})</option>`).join('')}</select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Metode Bayar</label>
+          <select name="metodeBayar" id="metode-bayar-select">
+            <option value="Tunai">Tunai</option>
+            <option value="Transfer">Transfer</option>
+            <option value="Tempo">Tempo</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select name="status" id="status-select">
+            <option value="Lunas">Lunas</option>
+            <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
+          </select>
+        </div>
+      </div>
       <div class="form-row">
         <div class="form-group"><label>Tanggal</label><input type="date" name="tanggal" value="${todayStr()}" required></div>
         <div class="form-group"><label>Jumlah</label><input type="text" class="rupiah-input" name="jumlahBayar" required min="1"></div>
@@ -852,15 +872,35 @@ async function openPaymentForm() {
 
   const jenisSelect = document.getElementById('jenis-select');
   const pihakContainer = document.getElementById('pihak-container');
+  const orderContainer = document.getElementById('order-container');
   function renderPihak() {
     if (jenisSelect.value === 'penerimaan_customer') {
       pihakContainer.innerHTML = `<label>Customer</label><select name="customerId" required><option value="">- Pilih -</option>${customers.map(c => `<option value="${c.id}">${escapeHtml(c.nama)}</option>`).join('')}</select>`;
+      orderContainer.style.display = '';
     } else if (jenisSelect.value === 'pengeluaran_supplier') {
       pihakContainer.innerHTML = `<label>Supplier</label><select name="supplierId" required><option value="">- Pilih -</option>${suppliers.map(s => `<option value="${s.id}">${escapeHtml(s.nama)}</option>`).join('')}</select>`;
+      orderContainer.style.display = 'none';
     } else {
       pihakContainer.innerHTML = `<label>Sales</label><select name="salesId" required><option value="">- Pilih -</option>${sales.map(s => `<option value="${s.id}">${escapeHtml(s.nama)}</option>`).join('')}</select>`;
+      orderContainer.style.display = 'none';
     }
   }
+  jenisSelect.addEventListener('change', () => {
+    renderPihak();
+    const metodeBayar = document.querySelector('#payment-form [name="metodeBayar"]');
+    const statusSelect = document.querySelector('#payment-form [name="status"]');
+    if (metodeBayar && statusSelect) {
+      if (jenisSelect.value === 'penerimaan_customer') {
+        metodeBayar.disabled = false;
+        statusSelect.disabled = false;
+      } else {
+        metodeBayar.value = 'Tunai';
+        statusSelect.value = 'Lunas';
+        metodeBayar.disabled = true;
+        statusSelect.disabled = true;
+      }
+    }
+  });
   jenisSelect.addEventListener('change', renderPihak);
   renderPihak();
   const jumlahInput = document.querySelector('#payment-form [name="jumlahBayar"]');
