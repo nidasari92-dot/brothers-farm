@@ -8,5 +8,6 @@ router.get('/', ctrl.list);
 router.get('/:id', ctrl.get);
 router.post('/', ctrl.create);
 router.put('/:id/status', adminOnly, ctrl.updateStatus);
+router.put('/:id/sales', adminOnly, ctrl.assignSales);
 
 module.exports = router;

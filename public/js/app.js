@@ -640,7 +640,10 @@ async function renderOrders() {
       <td>${escapeHtml(o.salesNama || '-')}</td>
       <td class="text-right">${rupiah(o.total)}</td>
       <td><span class="badge ${o.status === 'Lunas' ? 'green' : 'orange'}">${escapeHtml(o.status)}</span></td>
-      <td><button class="btn small secondary" onclick="viewOrder(${o.id})">Detail</button></td>
+      <td>
+        <button class="btn small secondary" onclick="viewOrder(${o.id})">Detail</button>
+        ${CURRENT_USER.role === 'admin' ? `<button class="btn small secondary" onclick="openAssignSalesForm(${o.id})">Assign Sales</button>` : ''}
+      </td>
     </tr>
   `).join('');
 
@@ -760,6 +763,36 @@ async function viewOrder(id) {
     <p class="text-right text-muted">Insentif Sales: ${rupiah(o.totalInsentif)}</p>
     <div class="modal-actions"><button class="btn secondary" onclick="closeModal()">Tutup</button></div>
   `);
+}
+
+async function openAssignSalesForm(orderId) {
+  const salesList = await Api.get('/sales');
+  openModal(`
+    <h3>Assign Sales ke Order</h3>
+    <form id="assign-sales-form">
+      <div class="form-group">
+        <label>Sales</label>
+        <select name="salesId" required>
+          <option value="">- Pilih -</option>${salesList.map(s => `<option value="${s.id}">${escapeHtml(s.nama)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn">Simpan</button>
+      </div>
+    </form>
+  `);
+  document.getElementById('assign-sales-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const body = Object.fromEntries(fd.entries());
+    try {
+      await Api.put(`/orders/${orderId}/sales`, body);
+      closeModal();
+      toast('Sales berhasil diassign.');
+      renderOrders();
+    } catch (err) { toast(err.message, true); }
+  });
 }
 
 // ============ Payments ============

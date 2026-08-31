@@ -166,4 +166,13 @@ function updateStatus(req, res) {
   res.json({ message: 'Status order diperbarui.' });
 }
 
-module.exports = { list, get, create, updateStatus, createOrderTransaction };
+function assignSales(req, res) {
+  const { salesId } = req.body;
+  const existing = db.prepare('SELECT id FROM orders WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Order tidak ditemukan.' });
+  if (!salesId) return res.status(400).json({ error: 'salesId wajib diisi.' });
+  db.prepare('UPDATE orders SET salesId = ? WHERE id = ?').run(salesId, req.params.id);
+  res.json({ message: 'Sales berhasil diassign ke order.' });
+}
+
+module.exports = { list, get, create, updateStatus, assignSales, createOrderTransaction };
