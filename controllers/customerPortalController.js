@@ -2,6 +2,7 @@ const { db } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { orderCreatedTemplate, paymentReceivedTemplate, sendMail } = require('../services/emailService');
 const { formatRupiah } = require('../utils/format');
+const { generateNoInvoice } = require('../controllers/invoiceController');
 
 // Generate unique payment ID
 function generatePaymentId() {
@@ -158,6 +159,15 @@ function createOrder(req, res) {
       items: items || []
     });
     sendMail(mail).catch(err => console.error('Failed to send order email:', err));
+
+    // Auto-create invoice for customer order
+    const settings = db.prepare('SELECT key, value FROM settings').all();
+    const map = Object.fromEntries(settings.map(s => [s.key, s.value]));
+    const noInvoice = generateNoInvoice('customer');
+    db.prepare(`
+      INSERT INTO invoice (noInvoice, tanggal, jenis, refId, total, logo, caption, createdBy)
+      VALUES (?, ?, 'customer', ?, ?, ?, ?, ?)
+    `).run(noInvoice, tanggal, result.orderId, result.total || 0, map.logo || null, 'Pembayaran customer - ' + orderNo, req.user.id);
 
     res.status(201).json(result);
   } catch (err) {

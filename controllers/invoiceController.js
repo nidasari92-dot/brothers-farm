@@ -336,4 +336,4 @@ function generateExcel(req, res) {
   });
 }
 
-module.exports = { list, get, getPreview, create, update, generatePdf, generateExcel };
+module.exports = { list, get, getPreview, create, update, generatePdf, generateExcel, generateNoInvoice };
