@@ -109,6 +109,38 @@ sudo docker-compose restart
 
 ---
 
+## Update Aplikasi
+
+### Manual Update
+```bash
+cd /opt/brothers-farm
+git pull origin main
+docker-compose up -d --build
+```
+
+### Automated Update (Cron)
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add this line (cek update setiap 5 menit)
+*/5 * * * * /opt/brothers-farm/scripts/update.sh >> /var/log/brothers-farm-update.log 2>&1
+```
+
+Log update: `/var/log/brothers-farm-update.log`
+
+### Cek Status Update
+```bash
+# Lihat log
+tail -f /var/log/brothers-farm-update.log
+
+# Cek versi yang sedang running
+git rev-parse main
+```
+
+---
+
 ## Troubleshooting
 
 ### Container tidak start
