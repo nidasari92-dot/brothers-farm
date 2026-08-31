@@ -280,8 +280,22 @@
       });
       const data = await res.json();
       if (res.ok) {
-        showAuthMsg('Registrasi berhasil! Silakan login.');
-        setTimeout(showLogin, 1200);
+        showAuthMsg('Registrasi berhasil! Mengarahkan ke akun baru...');
+        const loginRes = await fetch('/api/customer/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const loginData = await loginRes.json();
+        if (loginRes.ok && loginData.token) {
+          token = loginData.token;
+          user = loginData.user;
+          localStorage.setItem('customer_token', token);
+          localStorage.setItem('customer_user', JSON.stringify(user));
+          updateUI();
+        } else {
+          setTimeout(showLogin, 800);
+        }
       } else {
         showAuthMsg(data.error || 'Gagal daftar.');
       }
