@@ -61,6 +61,23 @@ function parseRupiahInput(input) {
   return Number(input.value.replace(/[^0-9]/g, '') || 0);
 }
 
+function formatKeterangan(keterangan) {
+  if (!keterangan) return '-';
+  const text = String(keterangan).trim();
+  if (text.startsWith('{') && text.endsWith('}')) {
+    try {
+      const obj = JSON.parse(text);
+      if (obj.orderNo && obj.customerName) {
+        return `Order: ${obj.orderNo}, Customer: ${obj.customerName}`;
+      }
+      return Object.values(obj).map(v => String(v)).filter(Boolean).join(', ') || text;
+    } catch {
+      return text;
+    }
+  }
+  return text;
+}
+
 // ============ Menu definition ============
 const MENU_ADMIN = [
   { key: 'dashboard', label: '📊 Dashboard' },
@@ -762,7 +779,7 @@ async function viewOrder(id) {
       <td>${escapeHtml(p.metodeBayar || '-')}</td>
       <td>${escapeHtml(p.status || '-')}</td>
       <td class="text-right">${rupiah(p.jumlahBayar)}</td>
-      <td>${escapeHtml(p.keterangan || '-')}</td>
+      <td>${escapeHtml(formatKeterangan(p.keterangan))}</td>
     </tr>
   `).join('') || '<tr><td colspan="6" class="text-muted">Belum ada pembayaran.</td></tr>';
 
