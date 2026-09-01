@@ -752,17 +752,70 @@ async function openOrderForm() {
 
 async function viewOrder(id) {
   const o = await Api.get(`/orders/${id}`);
-  openModal(`
-    <h3>Order ${escapeHtml(o.noOrder)}</h3>
-    <p class="text-muted">Tanggal: ${o.tanggal} | Customer: ${escapeHtml(o.customerNama || '-')} | Sales: ${escapeHtml(o.salesNama || '-')}</p>
-    <table class="mt-8">
-      <thead><tr><th>Produk</th><th>Qty</th><th class="text-right">Harga</th><th class="text-right">Subtotal</th></tr></thead>
-      <tbody>${o.items.map(i => `<tr><td>${escapeHtml(i.produkNama)}</td><td>${i.qty} ${escapeHtml(i.satuan || '')}</td><td class="text-right">${rupiah(i.hargaJual)}</td><td class="text-right">${rupiah(i.subtotal)}</td></tr>`).join('')}</tbody>
-    </table>
-    <p class="text-right mt-8"><strong>Total: ${rupiah(o.total)}</strong></p>
-    <p class="text-right text-muted">Insentif Sales: ${rupiah(o.totalInsentif)}</p>
-    <div class="modal-actions"><button class="btn secondary" onclick="closeModal()">Tutup</button></div>
-  `);
+  const page = document.getElementById('page-content');
+  page.innerHTML = '<p class="text-muted">Memuat...</p>';
+
+  const paymentsRows = (o.payments || []).map(p => `
+    <tr>
+      <td>${escapeHtml(p.noPembayaran)}</td>
+      <td>${p.tanggal}</td>
+      <td>${escapeHtml(p.metodeBayar || '-')}</td>
+      <td>${escapeHtml(p.status || '-')}</td>
+      <td class="text-right">${rupiah(p.jumlahBayar)}</td>
+      <td>${escapeHtml(p.keterangan || '-')}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" class="text-muted">Belum ada pembayaran.</td></tr>';
+
+  const invoicesRows = (o.invoices || []).map(inv => `
+    <tr>
+      <td>${escapeHtml(inv.noInvoice)}</td>
+      <td>${inv.tanggal}</td>
+      <td class="text-right">${rupiah(inv.total)}</td>
+      <td>${escapeHtml(inv.caption || '-')}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="4" class="text-muted">Belum ada invoice.</td></tr>';
+
+  page.innerHTML = `
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Order ${escapeHtml(o.noOrder)}</h3>
+        <button class="btn small secondary" onclick="renderOrders()">← Kembali</button>
+      </div>
+      <div class="form-row mt-8">
+        <div class="form-group"><label>Tanggal</label><div>${o.tanggal}</div></div>
+        <div class="form-group"><label>Customer</label><div>${escapeHtml(o.customerNama || '-')}</div></div>
+        <div class="form-group"><label>Sales</label><div>${escapeHtml(o.salesNama || '-')}</div></div>
+        <div class="form-group"><label>Metode Bayar</label><div>${escapeHtml(o.metodeBayar || '-')}</div></div>
+        <div class="form-group"><label>Jatuh Tempo</label><div>${o.jatuhTempo || '-'}</div></div>
+        <div class="form-group"><label>Status</label><div><strong>${o.status || '-'}</strong></div></div>
+        <div class="form-group"><label>Total Order</label><div><strong>${rupiah(o.total)}</strong></div></div>
+        <div class="form-group"><label>Total Bayar</label><div><strong>${rupiah(o.totalBayar)}</strong></div></div>
+        <div class="form-group"><label>Sisa</label><div><strong style="color:${o.sisa > 0 ? 'red' : 'green'}">${rupiah(o.sisa)}</strong></div></div>
+      </div>
+      <div class="mt-8">
+        <h4>Item Order</h4>
+        <table>
+          <thead><tr><th>Produk</th><th>Qty</th><th class="text-right">Harga</th><th class="text-right">Subtotal</th></tr></thead>
+          <tbody>${o.items.map(i => `<tr><td>${escapeHtml(i.produkNama)}</td><td>${i.qty} ${escapeHtml(i.satuan || '')}</td><td class="text-right">${rupiah(i.hargaJual)}</td><td class="text-right">${rupiah(i.subtotal)}</td></tr>`).join('')}</tbody>
+        </table>
+        <p class="text-right mt-8"><strong>Total: ${rupiah(o.total)}</strong></p>
+      </div>
+      <div class="mt-8">
+        <h4>Pembayaran</h4>
+        <table>
+          <thead><tr><th>No Pembayaran</th><th>Tanggal</th><th>Metode</th><th>Status</th><th class="text-right">Jumlah</th><th>Keterangan</th></tr></thead>
+          <tbody>${paymentsRows}</tbody>
+        </table>
+      </div>
+      <div class="mt-8">
+        <h4>Invoice</h4>
+        <table>
+          <thead><tr><th>No Invoice</th><th>Tanggal</th><th class="text-right">Total</th><th>Keterangan</th></tr></thead>
+          <tbody>${invoicesRows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
 }
 
 async function openAssignSalesForm(orderId) {

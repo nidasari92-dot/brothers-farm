@@ -88,7 +88,33 @@ function get(req, res) {
     WHERE oi.orderId = ?
   `).all(req.params.id);
 
-  res.json({ ...order, items });
+  const payments = db.prepare(`
+    SELECT p.*, u.username AS createdByName
+    FROM pembayaran p
+    LEFT JOIN users u ON u.id = p.createdBy
+    WHERE p.orderId = ?
+    ORDER BY p.id DESC
+  `).all(req.params.id);
+
+  const invoices = db.prepare(`
+    SELECT i.*, u.username AS createdByName
+    FROM invoice i
+    LEFT JOIN users u ON u.id = i.createdBy
+    WHERE i.jenis = 'customer' AND i.refId IN (SELECT id FROM pembayaran WHERE orderId = ?)
+    ORDER BY i.id DESC
+  `).all(req.params.id);
+
+  const totalBayar = payments.reduce((sum, p) => sum + (parseFloat(p.jumlahBayar) || 0), 0);
+  const sisa = (parseFloat(order.total) || 0) - totalBayar;
+
+  res.json({
+    ...order,
+    items,
+    payments,
+    invoices,
+    totalBayar,
+    sisa: Math.max(0, sisa)
+  });
 }
 
 // items: [{ produkId, qty, satuan, hargaJual (opsional, default harga terbaru produk) }]
