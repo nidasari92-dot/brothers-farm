@@ -841,7 +841,8 @@ async function openPaymentForm() {
       </div>
       <div class="form-group" id="order-container" style="display:none">
         <label>Order</label>
-        <select name="orderId"><option value="">- Pilih -</option>${unpaidOrders.map(o => `<option value="${o.id}">${o.noOrder} - ${escapeHtml(o.customerNama || '-')} (${rupiah(o.total)})</option>`).join('')}</select>
+        <select name="orderId" id="order-select"><option value="">- Pilih -</option>${unpaidOrders.map(o => `<option value="${o.id}" data-total="${o.total}">${escapeHtml(o.noOrder)} - ${escapeHtml(o.customerNama || '-')} (${rupiah(o.total)})</option>`).join('')}</select>
+        <div id="order-info" class="text-muted" style="font-size:12px;margin-top:4px;"></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Metode Bayar</label>
@@ -906,11 +907,47 @@ async function openPaymentForm() {
   const jumlahInput = document.querySelector('#payment-form [name="jumlahBayar"]');
   if (jumlahInput) formatRupiahInput(jumlahInput);
 
+  const orderSelect = document.getElementById('order-select');
+  const orderInfo = document.getElementById('order-info');
+  if (orderSelect) {
+    orderSelect.addEventListener('change', async () => {
+      const orderId = orderSelect.value;
+      if (!orderId) {
+        orderInfo.textContent = '';
+        return;
+      }
+      const opt = orderSelect.options[orderSelect.selectedIndex];
+      const total = parseFloat(opt.dataset.total || '0');
+      try {
+        const payments = await Api.get('/payments');
+        const orderPayments = (payments || []).filter(p => String(p.orderId) === String(orderId) && p.jenis === 'penerimaan_customer');
+        const totalBayar = orderPayments.reduce((sum, p) => sum + (parseFloat(p.jumlahBayar) || 0), 0);
+        const sisa = total - totalBayar;
+        orderInfo.innerHTML = `Total order: <strong>${rupiah(total)}</strong> | Sudah dibayar: <strong>${rupiah(totalBayar)}</strong> | <strong>Sisa: ${rupiah(Math.max(0, sisa))}</strong>`;
+      } catch {
+        orderInfo.innerHTML = `Total order: <strong>${rupiah(total)}</strong>`;
+      }
+    });
+  }
+
   document.getElementById('payment-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const body = Object.fromEntries(fd.entries());
     body.jumlahBayar = parseRupiahInput(document.querySelector('#payment-form [name="jumlahBayar"]'));
+
+    // Validasi jumlah pembayaran vs total order
+    if (body.orderId && body.jenis === 'penerimaan_customer') {
+      const opt = orderSelect.options[orderSelect.selectedIndex];
+      if (opt && opt.dataset.total) {
+        const total = parseFloat(opt.dataset.total);
+        if (body.jumlahBayar > total + 0.0001) {
+          toast(`Jumlah pembayaran (${rupiah(body.jumlahBayar)}) melebihi total order (${rupiah(total)}).`, true);
+          return;
+        }
+      }
+    }
+
     try {
       await Api.post('/payments', body);
       closeModal();

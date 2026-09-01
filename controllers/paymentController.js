@@ -55,6 +55,13 @@ const createPayment = db.transaction((payload, userId) => {
     }
   }
 
+  if (jenis === 'penerimaan_customer' && orderId) {
+    const order = db.prepare('SELECT total FROM orders WHERE id = ?').get(Number(orderId));
+    if (order && jumlah > order.total + 0.0001) {
+      throw new Error(`Jumlah pembayaran (${jumlah}) melebihi total order (${order.total}).`);
+    }
+  }
+
   const info = db.prepare(`
     INSERT INTO pembayaran (noPembayaran, tanggal, customerId, supplierId, salesId, jumlahBayar, jenis, keterangan, createdBy, orderId, metodeBayar, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
