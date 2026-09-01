@@ -41,9 +41,18 @@ const { formatRupiah } = require('../utils/format');
 
 router.use(authenticate);
 router.get('/recipients', (req, res) => {
-  const customers = db.prepare("SELECT id, nama, email FROM customer WHERE status = 'Aktif' AND email IS NOT NULL AND email != ''").all();
-  const sales = db.prepare("SELECT id, nama, hp AS email FROM sales WHERE status = 'Aktif'").all();
-  const suppliers = db.prepare("SELECT id, nama, hp AS email FROM supplier WHERE status = 'Aktif' AND hp IS NOT NULL AND hp != ''").all();
+  const custCols = db.prepare("PRAGMA table_info(customer)").all().map(c => c.name);
+  const custEmail = custCols.includes('email') ? 'email' : custCols.includes('hp') ? 'hp' : 'NULL';
+  const customers = db.prepare(`SELECT id, nama, ${custEmail} AS email FROM customer WHERE status = 'Aktif' AND (${custEmail} IS NOT NULL AND ${custEmail} != '')`).all();
+
+  const salesCols = db.prepare("PRAGMA table_info(sales)").all().map(c => c.name);
+  const salesEmail = salesCols.includes('email') ? 'email' : salesCols.includes('hp') ? 'hp' : 'NULL';
+  const sales = db.prepare(`SELECT id, nama, ${salesEmail} AS email FROM sales WHERE status = 'Aktif' AND (${salesEmail} IS NOT NULL AND ${salesEmail} != '')`).all();
+
+  const suppCols = db.prepare("PRAGMA table_info(supplier)").all().map(c => c.name);
+  const suppEmail = suppCols.includes('email') ? 'email' : suppCols.includes('hp') ? 'hp' : 'NULL';
+  const suppliers = db.prepare(`SELECT id, nama, ${suppEmail} AS email FROM supplier WHERE status = 'Aktif' AND (${suppEmail} IS NOT NULL AND ${suppEmail} != '')`).all();
+
   res.json({ customers, sales, suppliers });
 });
 router.post('/generate', adminOnly, async (req, res) => {
