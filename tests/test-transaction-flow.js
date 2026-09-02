@@ -107,6 +107,7 @@ async function run() {
       keterangan: 'Pembayaran order customer'
     }, adminToken);
     assert('Customer payment recorded', custPayRes.status === 201 && !!custPayRes.data.pembayaranId, JSON.stringify(custPayRes.data));
+    const custInvoiceId = custPayRes.data.invoiceId;
 
     const custInvAfterPay = custInvoices.data.find(i => i.refId === orderId);
     assert('Customer invoice total matches', custInvAfterPay && custInvAfterPay.total === orderRes.data.total, `invoiceTotal=${custInvAfterPay?.total} orderTotal=${orderRes.data.total}`);
@@ -201,8 +202,18 @@ async function run() {
 
     const allPayments = await req('GET', '/api/payments', null, adminToken);
     const allOrders = await req('GET', '/api/orders', null, adminToken);
+    const createdInvoiceIds = new Set([
+      custInvoiceId,
+      supplierInvoiceId,
+      bonusInvoiceId
+    ]);
+
     const orphanInvoices = finalInvoices.data.filter(inv => {
-      if (inv.jenis === 'customer') return !allOrders.data.some(o => o.id === inv.refId);
+      if (!createdInvoiceIds.has(inv.id)) return false;
+      if (inv.jenis === 'customer') {
+        const payment = allPayments.data.find(p => p.id === inv.refId);
+        return !payment || !allOrders.data.some(o => o.id === payment.orderId);
+      }
       if (inv.jenis === 'supplier' || inv.jenis === 'bonus') return !allPayments.data.some(p => p.id === inv.refId);
       return false;
     });
