@@ -73,8 +73,16 @@ const createPayment = db.transaction((payload, userId) => {
     db.prepare('UPDATE supplier SET totalBayar = totalBayar + ? WHERE id = ?').run(jumlah, supplierId);
   }
 
-  if (orderId && status === 'Lunas') {
-    db.prepare("UPDATE orders SET status = 'Lunas' WHERE id = ?").run(Number(orderId));
+  if (orderId) {
+    const totalBayarLain = db.prepare(`
+      SELECT COALESCE(SUM(jumlahBayar), 0) AS total FROM pembayaran
+      WHERE orderId = ? AND id != ?
+    `).get(Number(orderId), pembayaranId).total;
+    const totalBayarSekarang = totalBayarLain + jumlah;
+    const order = db.prepare('SELECT total FROM orders WHERE id = ?').get(Number(orderId));
+    if (order && totalBayarSekarang >= order.total - 0.0001) {
+      db.prepare("UPDATE orders SET status = 'Lunas' WHERE id = ?").run(Number(orderId));
+    }
   }
 
   let invoiceId = null;

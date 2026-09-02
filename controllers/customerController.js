@@ -1,7 +1,13 @@
 const { db } = require('../config/database');
 
 function list(req, res) {
-  res.json(db.prepare('SELECT * FROM customer ORDER BY id DESC').all());
+  res.json(db.prepare(`
+    SELECT c.*, s.nama AS salesNama,
+      (SELECT COALESCE(SUM(o.total), 0) FROM orders o WHERE o.customerId = c.id AND o.status != 'Lunas') AS piutang
+    FROM customer c
+    LEFT JOIN sales s ON s.id = c.salesId
+    ORDER BY c.id DESC
+  `).all());
 }
 
 function get(req, res) {

@@ -42,6 +42,26 @@ function create(req, res) {
   res.status(201).json({ message: 'Harga tersimpan.' });
 }
 
+function update(req, res) {
+  const { tanggal, produkId, hargaBeli, hargaJual } = req.body;
+  const id = Number(req.params.id);
+  const row = db.prepare('SELECT * FROM harga WHERE id = ?').get(id);
+  if (!row) return res.status(404).json({ error: 'Data harga tidak ditemukan.' });
+  db.prepare('UPDATE harga SET tanggal = ?, produkId = ?, hargaBeli = ?, hargaJual = ? WHERE id = ?')
+    .run(tanggal || row.tanggal, produkId || row.produkId, hargaBeli != null ? hargaBeli : row.hargaBeli, hargaJual != null ? hargaJual : row.hargaJual, id);
+  db.prepare('UPDATE produk SET hargaBeliTerakhir = ?, hargaJualTerakhir = ? WHERE id = ?')
+    .run(hargaBeli != null ? hargaBeli : row.hargaBeli, hargaJual != null ? hargaJual : row.hargaJual, produkId || row.produkId);
+  res.json({ message: 'Harga diperbarui.' });
+}
+
+function remove(req, res) {
+  const id = Number(req.params.id);
+  const row = db.prepare('SELECT * FROM harga WHERE id = ?').get(id);
+  if (!row) return res.status(404).json({ error: 'Data harga tidak ditemukan.' });
+  db.prepare('DELETE FROM harga WHERE id = ?').run(id);
+  res.json({ message: 'Data harga dihapus.' });
+}
+
 // Upload Excel: kolom yang diharapkan -> kode_produk | harga_beli | harga_jual
 // Baris pertama dianggap header.
 async function uploadExcel(req, res) {
@@ -82,4 +102,4 @@ async function uploadExcel(req, res) {
   }
 }
 
-module.exports = { list, create, uploadExcel };
+module.exports = { list, create, update, remove, uploadExcel };

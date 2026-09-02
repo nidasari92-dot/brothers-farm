@@ -17,6 +17,8 @@ const upload = multer({
 router.use(authenticate);
 router.get('/', ctrl.list);
 router.post('/', adminOnly, ctrl.create);
+router.put('/:id', adminOnly, ctrl.update);
+router.delete('/:id', adminOnly, ctrl.remove);
 router.post('/upload', adminOnly, upload.single('file'), ctrl.uploadExcel);
 
 module.exports = router;

@@ -421,6 +421,7 @@ async function renderCustomers() {
       <td>${escapeHtml(c.jenis || '-')}</td>
       <td>${escapeHtml(c.hp || '-')}</td>
       <td>${escapeHtml(c.salesNama || '-')}</td>
+      <td>${rupiah(c.piutang || 0)}</td>
       <td><span class="badge ${c.status === 'Aktif' ? 'green' : 'red'}">${c.status}</span></td>
       ${CURRENT_USER.role === 'admin' ? `<td><button class="btn small secondary" onclick="editCustomer(${c.id})">Edit</button></td>` : ''}
     </tr>
@@ -428,8 +429,8 @@ async function renderCustomers() {
 
   el.innerHTML = crudPanel('Daftar Customer', '+ Tambah Customer', `
     <table>
-      <thead><tr><th>Kode</th><th>Nama</th><th>Jenis</th><th>HP</th><th>Sales</th><th>Status</th>${CURRENT_USER.role === 'admin' ? '<th></th>' : ''}</tr></thead>
-      <tbody>${rows || '<tr><td colspan="7" class="text-muted">Belum ada customer.</td></tr>'}</tbody>
+      <thead><tr><th>Kode</th><th>Nama</th><th>Jenis</th><th>HP</th><th>Sales</th><th>Piutang</th><th>Status</th>${CURRENT_USER.role === 'admin' ? '<th></th>' : ''}</tr></thead>
+      <tbody>${rows || '<tr><td colspan="8" class="text-muted">Belum ada customer.</td></tr>'}</tbody>
     </table>
   `);
 
@@ -710,6 +711,16 @@ async function openOrderForm() {
       </div>
     </form>
   `);
+
+  const customerSelect = document.querySelector('#order-form [name="customerId"]');
+  const salesSelect = document.querySelector('#order-form [name="salesId"]');
+  if (customerSelect && salesSelect) {
+    customerSelect.addEventListener('change', () => {
+      const cid = Number(customerSelect.value);
+      const c = CUSTOMER_CACHE.find(x => x.id === cid);
+      if (c && c.salesId) salesSelect.value = c.salesId;
+    });
+  }
 
   const editor = document.getElementById('items-editor');
   function addItemRow() {
@@ -1274,10 +1285,11 @@ function renderPricesContent(prices, start, end) {
       <td class="text-right">${rupiah(h.hargaBeli)}</td>
       <td class="text-right">${rupiah(h.hargaJual)}</td>
       <td><span class="badge green">${h.sumber === 'excel_upload' ? 'Excel' : h.sumber === 'ocr' ? 'OCR' : h.sumber === 'import' ? 'Import' : 'Manual'}</span></td>
+      ${CURRENT_USER.role === 'admin' ? `<td><button class="btn small secondary" onclick="editPrice(${h.id})">Edit</button> <button class="btn small secondary" onclick="deletePrice(${h.id})">Hapus</button></td>` : ''}
     </tr>
   `).join('');
   toolbar.classList.remove('hidden');
-  content.innerHTML = `<table><thead><tr><th>Tanggal</th><th>Produk</th><th class="text-right">Harga Beli</th><th class="text-right">Harga Jual</th><th>Sumber</th></tr></thead><tbody>${rows || '<tr><td colspan="5" class="text-muted">Belum ada data harga.</td></tr>'}</tbody></table>`;
+  content.innerHTML = `<table><thead><tr><th>Tanggal</th><th>Produk</th><th class="text-right">Harga Beli</th><th class="text-right">Harga Jual</th><th>Sumber</th>${CURRENT_USER.role === 'admin' ? '<th></th>' : ''}</tr></thead><tbody>${rows || '<tr><td colspan="6" class="text-muted">Belum ada data harga.</td></tr>'}</tbody></table>`;
 }
 function bindAdminPriceButtons() {
   if (CURRENT_USER.role !== 'admin') return;
@@ -1337,6 +1349,50 @@ function openPriceForm() {
       closeModal(); toast('Harga tersimpan.'); renderPrices();
     } catch (err) { toast(err.message, true); }
   });
+}
+
+async function editPrice(id) {
+  const prices = await Api.get('/prices');
+  const p = prices.find(x => x.id === id);
+  if (!p) return toast('Data harga tidak ditemukan.', true);
+  openModal(`
+    <h3>Edit Harga</h3>
+    <form id="price-edit-form">
+      <div class="form-group"><label>Tanggal</label><input type="date" name="tanggal" value="${p.tanggal}" required></div>
+      <div class="form-group"><label>Produk</label>
+        <select name="produkId" required><option value="">- Pilih -</option>${PRODUK_CACHE.map(pr => `<option value="${pr.id}" ${pr.id === p.produkId ? 'selected' : ''}>${escapeHtml(pr.nama)}</option>`).join('')}</select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Harga Beli</label><input type="text" class="rupiah-input" name="hargaBeli" value="${p.hargaBeli || 0}"></div>
+        <div class="form-group"><label>Harga Jual</label><input type="text" class="rupiah-input" name="hargaJual" value="${p.hargaJual || 0}"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn">Simpan</button>
+      </div>
+    </form>
+  `);
+  document.querySelectorAll('#price-edit-form .rupiah-input').forEach(formatRupiahInput);
+  document.getElementById('price-edit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const body = Object.fromEntries(fd.entries());
+    ['hargaBeli','hargaJual'].forEach(k => {
+      if (body[k]) body[k] = parseRupiahInput(document.querySelector(`#price-edit-form [name="${k}"]`));
+    });
+    try {
+      await Api.put(`/prices/${id}`, body);
+      closeModal(); toast('Harga diperbarui.'); renderPrices();
+    } catch (err) { toast(err.message, true); }
+  });
+}
+
+async function deletePrice(id) {
+  if (!confirm('Hapus data harga ini?')) return;
+  try {
+    await Api.delete(`/prices/${id}`);
+    toast('Data harga dihapus.'); renderPrices();
+  } catch (err) { toast(err.message, true); }
 }
 
 function openExcelUploadForm() {
